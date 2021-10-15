@@ -1,7 +1,5 @@
 from flask import Flask, request
-from app.database import (
-    scan, insert, deactivate_user, select
-)
+from app.database import user, vehicle
 
 app = Flask(__name__)
 
@@ -10,7 +8,7 @@ def get_all_users():
     out = {
         "ok": True,
         "message": "Success",
-        "body": scan()
+        "body": user.scan()
     }
     return out
 
@@ -20,7 +18,7 @@ def create_user():
     out = {
         "ok": True,
         "message": "Success",
-        "new_id": insert(
+        "new_id": user.insert(
             user_data.get("first_name"),
             user_data.get("last_name"),
             user_data.get("hobbies")
@@ -34,7 +32,7 @@ def delete_user(pk):
         "ok": True,
         "message": "Success"
     }
-    deactivate_user(pk)
+    user.deactivate_user(pk)
     return out, 200
 
 @app.route("/users/<int:pk>", methods=["GET"])
@@ -42,6 +40,59 @@ def get_single_user(pk):
     out = {
         "ok": True,
         "message": "Success",
-        "body": select(pk)
+        "body": user.select(pk)
+    }
+    return out
+
+@app.route("/vehicles")
+def get_all_vehicles():
+    out = {
+        "ok": True,
+        "message": "Success",
+        "body": vehicle.scan()
+    }
+    return out
+
+@app.route("/vehicles", methods=["POST"])
+def create_vehicle():
+    vehicle_data = request.json
+    out = {
+        "ok": True,
+        "message": "Success",
+        "new_id": vehicle.insert(
+            vehicle_data.get("license_plate"),
+            vehicle_data.get("v_type"),
+            vehicle_data.get("color"),
+            vehicle_data.get("parking_spot_no"),
+            vehicle_data.get("description"),
+            vehicle_data.get("user_id")
+        )
+    }
+    return out, 201
+
+@app.route("/vehicles/<int:pk>", methods=["PUT"])
+def update_vehicle(pk):
+    out = {
+        "ok": True,
+        "message": "Success"
+    }
+    vehicle.update_vehicle(pk)
+    return out, 200
+
+@app.route("/vehicles/<int:pk>", methods=["GET"])
+def get_single_vehicle(pk):
+    out = {
+        "ok": True,
+        "message": "Success",
+        "body": vehicle.select(pk)
+    }
+    return out
+
+@app.route("/users/<int:pk>/vehicles", methods=["GET"])
+def get_vehicles_for_user(pk):
+    out = {
+        "ok": True,
+        "message": "Success",
+        "body": vehicle.select_by_user_id(pk)
     }
     return out
